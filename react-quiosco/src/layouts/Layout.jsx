@@ -1,5 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import Modal from 'react-modal'
+import {ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from '../components/Sidebar'
 import Resumen from '../components/Resumen'
 import useQuiosco from '../hooks/useQuiosco'
@@ -18,7 +20,7 @@ const customStyles = {
 
 Modal.setAppElement("#root");
 export default function Layout() {
-  const { modal, handleClickModal } = useQuiosco();
+  const { modal } = useQuiosco();
   return (
     <>
       <div className='md:flex'>
@@ -32,13 +34,8 @@ export default function Layout() {
       </div>
         <Modal isOpen={modal} style={customStyles}>
           <ModalProducto />
-          {/* <p>Desde Modal</p>
-          <button
-            onClick={handleClickModal}
-          >
-            Cerrar
-          </button> */}
         </Modal>
+        <ToastContainer />
     </>
   )
 }

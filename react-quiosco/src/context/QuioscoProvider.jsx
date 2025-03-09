@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from 'react'
+import { createContext, useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import clienteAxios from '../config/axios';
 const QuioscoContext = createContext();
@@ -16,8 +16,13 @@ const QuioscoProvider = ({children}) => {
     }, [pedido]);
 
     const obtenerCategorias = async () => {
+        const token = localStorage.getItem('AUTH_TOKEN');
         try {
-            const {data} = await clienteAxios('/api/categorias');
+            const {data} = await clienteAxios('/api/categorias', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             setCategorias(data.data);
             setCategoriaActual(data.data[0]);
         } catch (error) {
@@ -58,6 +63,56 @@ const QuioscoProvider = ({children}) => {
         setPedido(pedidoActualizado);
         toast.success('Eliminado del Pedido');
     }
+    const handleSubmitNuevaOrden = async () => {
+        const token = localStorage.getItem('AUTH_TOKEN');
+        try {
+            const {data} = await clienteAxios.post('/api/pedidos', 
+            {
+                total,
+                productos: pedido.map(producto => {
+                    return {
+                        id: producto.id,
+                        cantidad: producto.cantidad
+                    }
+                })
+            }, 
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            toast.success(data.message);
+            setTimeout(() => {
+                setPedido([]);
+            }, 1000);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    const handleClickCompletarPedido = async id => {
+        const token = localStorage.getItem('AUTH_TOKEN');
+        try {
+            await clienteAxios.put(`/api/pedidos/${id}`, null, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    const handleClickProductoAgotado = async id => {
+        const token = localStorage.getItem('AUTH_TOKEN');
+        try {
+            await clienteAxios.put(`/api/productos/${id}`, null, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+        } catch (error) {
+            console.log(error);
+        }
+    }
     return (
         <QuioscoContext.Provider
             value={{
@@ -72,7 +127,10 @@ const QuioscoProvider = ({children}) => {
                 handleAgregarPedido,
                 handleEditarCantidad,
                 handleEliminarProductoPedido,
-                total
+                total,
+                handleSubmitNuevaOrden,
+                handleClickCompletarPedido,
+                handleClickProductoAgotado
             }}
         >{children}</QuioscoContext.Provider>
     )
